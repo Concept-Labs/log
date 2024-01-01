@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": "^8.0",
-        "psr/log": "^3.0"
+        "psr/log": "^3.0",
+        "concept-labs/enum": "^1.0"
 
     },
     "autoload": {
