@@ -16,7 +16,7 @@ class Logger extends AbstractLogger
      */
     public function log($level, string|\Stringable $message, array $context = []): void
     {
-        
+        error_log();
     }
 
 }
