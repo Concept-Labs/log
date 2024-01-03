@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Cl\Log;
 
+use Cl\Log\Exception\LoggerAlreadyExistsException;
 use Cl\Log\Exception\LoggerNotFoundException;
 use Psr\Log\LoggerInterface;
 
@@ -14,8 +15,8 @@ class LoggerContainer implements LoggerContainerInterface
     {
         return match (true) {
             $this->has($alias) => $this->_loggers[$alias],
-            default=> throw new LoggerNotFoundException(sprintf('Logger "%s" not found', $alias));
-        }
+            default=> throw new LoggerNotFoundException(sprintf('Logger "%s" not found', $alias)),
+        };
     }
 
     public function has(string $alias): bool

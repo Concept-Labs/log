@@ -9,6 +9,9 @@ use Cl\Log\LoggerContainer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @covers Cl\Log\LoggerContainer
+ */
 class LoggerContainerTest extends TestCase
 {
     /**
