@@ -1,7 +1,7 @@
 {
     "name": "concept-labs/log",
     "description": "(C)oncept-Labs Logger",
-    "keywords": ["php","config"],
+    "keywords": ["php","config", "json"],
     "license": "MIT",
     "authors": [
         {

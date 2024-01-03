@@ -1,2 +1,2 @@
 # log
-logger
+logger psr-3
