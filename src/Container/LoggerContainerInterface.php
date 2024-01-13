@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Cl\Log;
+namespace Cl\Log\Container;
 
-use Psr\Log\LoggerInterface;
+use Cl\Log\LoggerInterface;
 
-use Cl\Log\Exception\LoggerAlreadyExistsException;
-use Cl\Log\Exception\LoggerNotFoundException;
+use Cl\Log\Container\Exception\LoggerAlreadyExistsException;
+use Cl\Log\Container\Exception\LoggerNotFoundException;
 
 /**
  * Interface LoggerContainerInterface

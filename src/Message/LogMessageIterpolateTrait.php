@@ -2,9 +2,9 @@
 declare(strict_types=1);
 namespace Cl\Log\Message;
 
+use Cl\Log\Message\Exception\InvalidArgumentException;
 use Cl\Log\Message\Exception\InvalidContextException;
 use Cl\Log\Message\Exception\InvalidRegexException;
-use Stringable;
 
 trait LogMessageIterpolateTrait
 {
@@ -31,17 +31,17 @@ trait LogMessageIterpolateTrait
                 //-------------------------------------------------//
                 /* Keep to figure out about throwing forward or logging */
                 
-                // throw new InvalidContextException(
-                //     sprintf(
-                //         'An error occured during conversion to string: %s',
-                //         $e->getMessage()
-                //     ),
-                //     $e->getCode(),
-                //     $e
-                // );
+                throw new InvalidArgumentException(
+                    sprintf(
+                        'Message interpolation failed: %s',
+                        $e->getMessage()
+                    ),
+                    $e->getCode(),
+                    $e
+                );
             }
 
-            if (is_string($replacement)) {
+            if (!empty($replacement)) {
                 // Merge replacements for each context item
                 $replace += [
                     LogMessageInterface::PLACEHOLDER_OPEN_TAG . $placeholder . LogMessageInterface::PLACEHOLDER_CLOSE_TAG  => $replacement
@@ -49,7 +49,7 @@ trait LogMessageIterpolateTrait
             }
         }
         // Perform the string replacement in the message
-        $this->processedMessage = strtr($this->message, $replace);
+        $this->processedMessage = sprintf('%s %s', $this->getLogLevel(), strtr($this->message, $replace));
 
         return $this;
     }
@@ -63,7 +63,8 @@ trait LogMessageIterpolateTrait
     {
         $openTag = LogMessageInterface::PLACEHOLDER_OPEN_TAG;
         $closeTag = LogMessageInterface::PLACEHOLDER_CLOSE_TAG;
-        return "/\\{$openTag}([^{$closeTag}]+)\\{$closeTag}/sumix";
+            return "!\\{$openTag}([^\\{$closeTag}\s]*)\\{$closeTag}!";
+        //return "/\\{$openTag}([^{$closeTag}]+)\\{$closeTag}/sumix";
     }
 
     /**
@@ -94,9 +95,6 @@ trait LogMessageIterpolateTrait
      */
     protected function assertContextValidException(): LogMessageInterface
     {
-        $this->contextException = null;
-        
-        
         if (isset($this->context['exception'])) {
 
             $this->contextException = match (true) {
@@ -105,13 +103,14 @@ trait LogMessageIterpolateTrait
                 $this->context['exception'] instanceof \Throwable => $this->context['exception'],
 
                 // Context contains invalid exception value
-                default => throw new InvalidContextException(
-                    sprintf(
-                        'The context`s "exception" key must be type of %s. %s was given',
-                        \Throwable::class,
-                        get_debug_type($this->contextException)
-                    )
-                )
+                default => null
+                // throw new InvalidContextException(
+                //     sprintf(
+                //         'The context`s "exception" key must be type of %s. %s was given',
+                //         \Throwable::class,
+                //         get_debug_type($this->contextException)
+                //     )
+                // )
             };
         } 
             

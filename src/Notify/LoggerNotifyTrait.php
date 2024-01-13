@@ -1,5 +1,5 @@
 <?php
-namespace Cl\Log;
+namespace Cl\Log\Notify;
 
 trait LoggerNotifyTrait
 {

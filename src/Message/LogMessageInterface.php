@@ -13,21 +13,24 @@ interface LogMessageInterface extends LogMessageIterpolateInterface
  
     /**
      * Sets the message and context
-     *
-     * @param string $message The message to be interpolated 
-     * @param mixed  $context The context with actual values
+     * 
+     * @param string $logLevel         The log level
+     * @param string $message          The message to be interpolated 
+     * @param mixed  $context          The context with actual values
+     * @param ?bool  $forceInterpolate Force interpolate message on setter
      * 
      * @return LogMessageInterface
      */
-    public function set(string $message, mixed $context): LogMessageInterface;
+    public function set(string $logLevel, string $message, mixed $context, ?bool $forceInterpolate = false): LogMessageInterface;
 
     /**
      * Get the interpolated string
      * 
+     * @param ?bool $forceInterpolate 
      * @param ?bool $escape 
      *
      * @return string
      */
-    public function get(?bool $escape = false): string;
+    public function get(?bool $forceInterpolate = true, ?bool $escape = false): string;
 
 }

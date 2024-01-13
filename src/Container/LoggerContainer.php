@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Cl\Log;
+namespace Cl\Log\Container;
 
-use Cl\Log\Exception\LoggerAlreadyExistsException;
-use Cl\Log\Exception\LoggerNotFoundException;
-use Psr\Log\LoggerInterface;
+use Cl\Log\Container\Exception\NotFoundException;
+use Cl\Log\Container\Exception\AlreadyExistsException;
+use Cl\Log\LoggerInterface;
 
 class LoggerContainer implements LoggerContainerInterface
 {
@@ -15,7 +15,7 @@ class LoggerContainer implements LoggerContainerInterface
     {
         return match (true) {
             $this->has($alias) => $this->_loggers[$alias],
-            default=> throw new LoggerNotFoundException(sprintf('Logger "%s" not found', $alias)),
+            default=> throw new NotFoundException(sprintf('Logger "%s" not found', $alias)),
         };
     }
 
@@ -27,7 +27,7 @@ class LoggerContainer implements LoggerContainerInterface
     public function attach(string $alias, LoggerInterface $logger): void
     {
         if ($this->has($alias)) {
-            throw new LoggerAlreadyExistsException(sprintf('Container already contains the logger with alias "%s"'));
+            throw new AlreadyExistsException(sprintf('Container already contains the logger with alias "%s"'));
         }
 
         $this->_loggers[$alias] = $logger;

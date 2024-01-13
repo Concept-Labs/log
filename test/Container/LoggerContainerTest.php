@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Cl\Log\Tests;
+namespace Cl\Log\Tests\Container;
 
-use Cl\Log\LoggerContainerInterface;
-use Cl\Log\Exception\LoggerNotFoundException;
-use Cl\Log\LoggerContainer;
+use Cl\Log\LoggerInterface;
+
+use Cl\Log\Container\LoggerContainerInterface;
+use Cl\Log\Container\LoggerContainer;
+use Cl\Log\Container\Exception\NotFoundException;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 /**
  * @covers Cl\Log\LoggerContainer
@@ -20,9 +21,10 @@ class LoggerContainerTest extends TestCase
     public function testAttachAndGet(): void
     {
         $container = $this->createContainer();
-        $logger = $this->createMock(LoggerInterface::class);
-
+        /** @var  LoggerInterface $logger */
+        $logger = $this->getMockBuilder(LoggerInterface::class)->getMock();
         $container->attach('test', $logger);
+        
 
         $this->assertSame($logger, $container->get('test'));
     }
@@ -63,7 +65,7 @@ class LoggerContainerTest extends TestCase
      */
     public function testGetNonexistentLogger(): void
     {
-        $this->expectException(LoggerNotFoundException::class);
+        $this->expectException(NotFoundException::class);
 
         $container = $this->createContainer();
         $container->get('nonexistent');

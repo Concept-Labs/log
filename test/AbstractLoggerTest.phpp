@@ -3,8 +3,6 @@
 namespace Cl\Log\Test;
 
 use Cl\Log\AbstractLogger;
-use Cl\Log\Message\Exception\InvalidContextException;
-use Cl\Log\Message\LogMessage;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -12,14 +10,14 @@ use Stringable;
 use Exception;
 
 /**
- * @covers Cl\Log\Message\LogMessage
+ * @covers Cl\Log\AbstractLogger
  */
-class LogMessageTest extends TestCase
+class AbstractLoggerTest extends TestCase
 {
 
-    public static LogMessage|null $logMessage = null;
-    public static object|null     $contextObject = null;
-    public static array|null      $contextScalar = null;
+    public static LoggerInterface|null $logger = null;
+    public static object|null          $contextObject = null;
+    public static array|null           $contextScalar = null;
 
 
     public function __construct($name)
@@ -36,7 +34,34 @@ class LogMessageTest extends TestCase
     {
 
         // Init logger using abstractLogger
-        static::$logMessage = new LogMessage();
+        static::$logger = new class extends AbstractLogger {
+            /**
+             * Make the interpolate() method public
+             *
+             * @param string     $message 
+             * @param array|null $context 
+             * 
+             * @return string
+             */
+            public function publicInterpolate(string $message, ?array $context = []): string
+            {
+                return $this->interpolateMessage(message: $message, context: $context);
+            }
+
+            /**
+             * Null logger
+             *
+             * @param mixed             $level 
+             * @param string|Stringable $message 
+             * @param array             $context 
+             * 
+             * @return void
+             */
+            public function log(mixed $level, string|Stringable $message, ?array $context = []): void
+            {
+                //null
+            }
+        };
 
         // Scalar context
         static::$contextScalar = [
@@ -94,12 +119,12 @@ class LogMessageTest extends TestCase
      *
      * @return void
      */
-    public function testInterpolateWithScalars(): void
+    public function testInterpolateMessage(): void
     {
         $message ='Scalar values: {string} {number} {boolean} {stringable}';
         $context = static::$contextScalar;
 
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals('Scalar values: Hello 42 true Stringable', $result);
     }
@@ -115,7 +140,7 @@ class LogMessageTest extends TestCase
     //     $message ='Scalar values: {string} {number} {boolean} {stringable} {stringableWithException}';
     //     $context = static::$contextScalar;
 
-    //     $result = static::$logMessage->set($message, $context)->get();
+    //     $result = static::$logger->publicInterpolate($message, $context);
     // }
 
     /**
@@ -129,9 +154,25 @@ class LogMessageTest extends TestCase
         $context = [
             'object' => static::$contextObject,
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals('Obect property: public: Public property', $result);
+    }
+    
+    /**
+     *
+     * @return void
+     */
+    public function testInterpolateObjectNonPublicProperties(): void
+    {
+        $this->expectException(\Cl\Log\Message\Exception\InvalidArgumentException::class);
+
+        $message ='Obect property: public: {object.publicProperty} {object.protectedProperty} {object._privateProperty}';
+
+        $context = [
+            'object' => static::$contextObject,
+        ];
+        $result = static::$logger->publicInterpolate($message, $context);
     }
 
     /**
@@ -145,7 +186,7 @@ class LogMessageTest extends TestCase
         $context = [
             'object' => static::$contextObject,
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals('Sub obect property: string sub property', $result);
     }
@@ -161,9 +202,9 @@ class LogMessageTest extends TestCase
         $context = [
             'object' => static::$contextObject,
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
-        $this->assertEquals('Sub obect property:  ', $result);
+        $this->assertEquals('Sub obect property: {object.notExistsProperty} {object.subObject.stringSubProperty.subsub}', $result);
     }
 
     /**
@@ -178,7 +219,7 @@ class LogMessageTest extends TestCase
 
         $context = static::$contextScalar;
         $context['object'] = static::$contextObject;
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals(
             'Scalar values: Hello 42 true Stringable;
@@ -199,7 +240,7 @@ class LogMessageTest extends TestCase
         $context = [
             'array' => [1=>"one", "two" => "second"]
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals('Array offset: one second', $result);
     }
@@ -215,7 +256,7 @@ class LogMessageTest extends TestCase
         $context = [
             'array' => [1=>"one", "two" => "second", 3=>['forth'=>'four']]
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
         $this->assertEquals('Array offset: one second four', $result);
     }
@@ -231,8 +272,8 @@ class LogMessageTest extends TestCase
         $context = [
             'array' => [1=>"one", "two" => "second"]
         ];
-        $result = static::$logMessage->set($message, $context)->get();
+        $result = static::$logger->publicInterpolate($message, $context);
 
-        $this->assertEquals('Array offset:  ', $result);
+        $this->assertEquals('Array offset: {array.notExists} {array.4}', $result);
     }
 }
