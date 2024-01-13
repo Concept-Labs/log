@@ -1,16 +1,18 @@
 <?php
 namespace Cl\Log\Logger\Aware;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Describes a logger-aware instance.
  */
-interface LoggerAwareInterface
+interface LoggerAwareInterface extends \Psr\Log\LoggerAwareInterface
 {
     /**
-     * Sets a logger instance on the object.
+     * Gets the logger instance
      *
-     * @param LoggerInterface $logger
-     * @return void
+     * @return LoggerInterface
      */
-    public function setLogger(LoggerInterfac $logger);
+    function getLogger(): LoggerInterface;
+
 }
